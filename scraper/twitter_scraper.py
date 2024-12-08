@@ -546,8 +546,27 @@ It may be due to the following:
             print("Created Folder: {}".format(folder_path))
 
         data = {
+            "Name": [tweet[0] for tweet in self.data],
+            "Handle": [tweet[1] for tweet in self.data],
+            "Timestamp": [tweet[2] for tweet in self.data],
+            "Verified": [tweet[3] for tweet in self.data],
             "Content": [tweet[4] for tweet in self.data],
+            "Comments": [tweet[5] for tweet in self.data],
+            "Retweets": [tweet[6] for tweet in self.data],
+            "Likes": [tweet[7] for tweet in self.data],
+            "Analytics": [tweet[8] for tweet in self.data],
+            "Tags": [tweet[9] for tweet in self.data],
+            "Mentions": [tweet[10] for tweet in self.data],
+            "Emojis": [tweet[11] for tweet in self.data],
+            "Profile Image": [tweet[12] for tweet in self.data],
+            "Tweet Link": [tweet[13] for tweet in self.data],
+            "Tweet ID": [f"tweet_id:{tweet[14]}" for tweet in self.data],
         }
+
+        if self.scraper_details["poster_details"]:
+            data["Tweeter ID"] = [f"user_id:{tweet[15]}" for tweet in self.data]
+            data["Following"] = [tweet[16] for tweet in self.data]
+            data["Followers"] = [tweet[17] for tweet in self.data]
 
         df = pd.DataFrame(data)
 
