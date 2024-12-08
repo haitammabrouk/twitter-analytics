@@ -27,8 +27,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Hardcode the environment variables (Twitter credentials)
-ENV TWITTER_USERNAME=default_username
-ENV TWITTER_PASSWORD=default_password
+ENV TWITTER_USERNAME=@Mohamed31441078
+ENV TWITTER_PASSWORD=Mohamed1234@
 
 # Set the default command to run the scraper
 ENTRYPOINT ["python", "scraper"]

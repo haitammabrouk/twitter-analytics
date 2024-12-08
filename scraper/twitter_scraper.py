@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+
 import pandas as pd
 from progress import Progress
 from scroller import Scroller
@@ -8,6 +10,8 @@ from tweet import Tweet
 from datetime import datetime
 from fake_headers import Headers
 from time import sleep
+
+import json
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -28,8 +32,29 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
+from kafka import KafkaProducer
+
 TWITTER_LOGIN_URL = "https://twitter.com/i/flow/login"
 
+
+# Kafka configuration
+KAFKA_BROKER = 'localhost:9092'  # Kafka broker address inside the Docker network
+KAFKA_TOPIC = 'tweets_topic'  # Kafka topic name
+
+# Initialize Kafka producer
+producer = KafkaProducer(
+    bootstrap_servers=[KAFKA_BROKER],
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serialize data as JSON
+)
+
+# Function to send data to Kafka
+def send_to_kafka(data):
+    try:
+        # Send data to the Kafka topic
+        producer.send(KAFKA_TOPIC, value=data)
+        print(f"Sent data to Kafka: {data}")
+    except Exception as e:
+        print(f"Error sending data to Kafka: {e}")
 
 class Twitter_Scraper:
     def __init__(
@@ -463,6 +488,7 @@ It may be due to the following:
                                 if not tweet.error and tweet.tweet is not None:
                                     if not tweet.is_ad:
                                         self.data.append(tweet.tweet)
+                                        send_to_kafka(tweet.tweet)
                                         print(tweet.tweet)
                                         added_tweets += 1
                                         self.progress.print_progress(len(self.data), False, 0, no_tweets_limit)
