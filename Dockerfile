@@ -26,9 +26,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire project into the container
 COPY . .
 
-# Hardcode the environment variables (Twitter credentials)
-ENV TWITTER_USERNAME=@Mohamed31441078
-ENV TWITTER_PASSWORD=Mohamed1234@
+# Define Args during the build phase
+ARG TWITTER_USERNAME_ARG
+ARG TWITTER_PASSWORD_ARG
 
-# Set the default command to run the scraper
-ENTRYPOINT ["python", "scraper"]
+# Set Credentials based on the passed in Arguments
+ENV TWITTER_USERNAME=$TWITTER_USERNAME_ARG
+ENV TWITTER_PASSWORD=$TWITTER_PASSWORD_ARG

@@ -32,29 +32,77 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-from kafka import KafkaProducer
+from confluent_kafka import Producer
+from confluent_kafka.admin import AdminClient, NewTopic
 
 TWITTER_LOGIN_URL = "https://twitter.com/i/flow/login"
 
 
 # Kafka configuration
-KAFKA_BROKER = 'localhost:9092'  # Kafka broker address inside the Docker network
-KAFKA_TOPIC = 'tweets_topic'  # Kafka topic name
+KAFKA_BROKER = 'kafka1:19092'  # Kafka broker address inside the Docker network
+KAFKA_TOPIC = 'twitter_topic'  # Kafka topic name
 
-# Initialize Kafka producer
-producer = KafkaProducer(
-    bootstrap_servers=[KAFKA_BROKER],
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')  # Serialize data as JSON
-)
+
+# Comprehensive Kafka connection and topic creation
+def setup_kafka():
+    try:
+        # Admin client configuration
+        admin_config = {
+            'bootstrap.servers': KAFKA_BROKER,
+            'client.id': 'tweets-scraper-admin'
+        }
+        admin_client = AdminClient(admin_config)
+
+        # Create topic
+        new_topic = NewTopic(KAFKA_TOPIC, num_partitions=3, replication_factor=3)
+
+        # Attempt to create topic
+        fs = admin_client.create_topics([new_topic])
+        for topic, future in fs.items():
+            try:
+                future.result()
+                print(f"Topic {topic} created successfully")
+            except Exception as e:
+                print(f"Topic {topic} creation failed (might already exist): {e}")
+
+        # Producer configuration
+        producer_config = {
+            'bootstrap.servers': KAFKA_BROKER,
+            'client.id': 'tweets-scraper',
+            'debug': 'all',  # Enable detailed debugging
+            'socket.timeout.ms': 10000,  # Increase timeout
+            'request.timeout.ms': 15000  # Increase request timeout
+        }
+
+        # Create and return producer
+        return Producer(producer_config)
+
+    except Exception as e:
+        print(f"Kafka setup error: {e}")
+        sys.exit(1)
+
+producer = setup_kafka()
+
+def delivery_report(err, msg):
+    if err is not None:
+        print(f'Message delivery failed: {err}')
+        print(f'Error code: {err.code()}')
+        print(f'Error string: {err.str()}')
+    else:
+        print(f'Message delivered to {msg.topic()} [{msg.partition()}]')
 
 # Function to send data to Kafka
 def send_to_kafka(data):
     try:
-        # Send data to the Kafka topic
-        producer.send(KAFKA_TOPIC, value=data)
-        print(f"Sent data to Kafka: {data}")
+        producer.produce(
+            KAFKA_TOPIC,
+            json.dumps(data).encode('utf-8'),
+            callback=delivery_report
+        )
+        producer.poll(0)
+        producer.flush(timeout=10)  # Flush with timeout
     except Exception as e:
-        print(f"Error sending data to Kafka: {e}")
+        print(f"Error sending message to Kafka: {e}")
 
 class Twitter_Scraper:
     def __init__(
