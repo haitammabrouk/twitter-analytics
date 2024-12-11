@@ -13,7 +13,12 @@ This project consists of a Twitter scraper implemented with Selenium and integra
 ## Prerequisites
 
 1. Install Docker and Docker Compose on your system.
-2. Set up environment variables for Twitter credentials:
+2. Install Python dependencies locally (optional for testing the scraper outside Docker):
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Set up environment variables for Twitter credentials:
 
    ```bash
    export TWITTER_USERNAME="<your_twitter_username>"
