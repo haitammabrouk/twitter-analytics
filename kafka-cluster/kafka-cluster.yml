@@ -81,7 +81,7 @@ services:
       - kafka1
       - kafka2
       - kafka3
-    command: ["python", "scraper", "--tweets", "7000"]
+    command: ["python", "scraper", "--tweets", "7000", "-q", "trump vote 2024"]
     networks:
       - kafka-network
     extra_hosts:
