@@ -363,7 +363,7 @@ It may be due to the following:
                 break
             except NoSuchElementException:
                 input_attempt += 1
-                if input_gattempt >= 3:
+                if input_attempt >= 3:
                     print()
                     print(
                         """There was an error inputting the password.
