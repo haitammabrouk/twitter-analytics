@@ -87,6 +87,14 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  spark-streaming-app:
+    image: spark-streaming-app
+    container_name: spark-streaming-app
+    networks:
+      - kafka-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 networks:
   kafka-network:
     driver: bridge

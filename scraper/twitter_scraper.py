@@ -39,7 +39,7 @@ TWITTER_LOGIN_URL = "https://twitter.com/i/flow/login"
 
 
 # Kafka configuration
-KAFKA_BROKER = 'kafka1:19092'  # Kafka broker address inside the Docker network
+KAFKA_BROKER = 'kafka1:19092,kafka2:19093,kafka3:19094'  # Kafka broker address inside the Docker network
 KAFKA_TOPIC = 'twitter_topic'  # Kafka topic name
 
 
